@@ -5,6 +5,7 @@ Domain: Financial Services • Payments • Risk Analytics
 Tools: Python (Pandas, NumPy, Matplotlib, Seaborn), Snowflake, Power BI
 
 1. Business Context & Objective
+
 The Scenario
 
 Cardm is a digital payments provider processing hundreds of thousands of card transactions daily. Leadership is preparing for a quarterly risk and operations review and requires clarity on three critical questions:
@@ -15,11 +16,13 @@ Operational Efficiency: Are current review controls balancing fraud prevention w
 
 Financial Impact: Do expanded review strategies meaningfully reduce losses, or do they introduce excessive operational cost?
 
+
 The Problem
 
 Fraud is rare (<0.2%) but disproportionately costly. While multiple risk signals exist, applying controls too broadly increases manual review workload and customer disruption. Applying them too narrowly allows fraud leakage.
 
 Raw transaction data alone does not reveal whether intervention is economically justified.
+
 
 The Objective
 
@@ -57,13 +60,16 @@ Output: Executive-ready dashboards and decision insights
 3. Business Logic & Risk Signal Design
 
 Rather than focusing on black-box models, the analysis emphasized transparent, explainable signals aligned with business logic.
+| Risk Signal          | Business Logic Applied                             | Operational Value                                       |
+| -------------------- | -------------------------------------------------- | ------------------------------------------------------- |
+| Amount Deviation     | Transaction amount relative to customer’s baseline | Identifies behavioral anomalies beyond fixed thresholds |
+| Time-of-Day Risk     | Elevated fraud during low-volume overnight hours   | Supports time-based monitoring                          |
+| Transaction Velocity | 24-hour rolling transaction count                  | Captures burst behavior indicative of fraud             |
+| Risk Tiering         | Rule-based Low / Medium / High tiers               | Enables selective review and prioritization             |
 
-Risk Signal	Business Logic Applied	Operational Value
-Amount Deviation	Transaction amount relative to customer’s baseline	Identifies behavioral anomalies beyond fixed thresholds
-Time-of-Day Risk	Elevated fraud during low-volume overnight hours	Supports time-based monitoring
-Transaction Velocity	24-hour rolling transaction count	Captures burst behavior indicative of fraud
-Risk Tiering	Rule-based Low / Medium / High tiers	Enables selective review and prioritization
+
 4. Root Cause Analysis & Key Findings
+   
 🚩 Case 1: Behavioral Deviation as a Fraud Indicator
 
 Finding:
@@ -87,17 +93,19 @@ Action Taken:
 Evaluated expanded controls via an A/B-style threshold tuning experiment.
 
 5. Threshold Tuning Experiment (A/B)
-Experiment Design
-Group	Review Strategy
-Control (A)	Review only highest-risk transactions
-Treatment (B)	Expanded review using behavioral signals
-Results Summary
-Metric	Control	Treatment
-Flag Rate	 0%	12.6%
-Fraud Recall	0%	19.5%
-Review Cost ($)	$0	$537K
-Loss Prevented ($)	$0	$24K
-Net Impact ($)	$0	–$513K
+| Group             | Review Strategy                          |
+| ----------------- | ---------------------------------------- |
+| **Control (A)**   | Review only highest-risk transactions    |
+| **Treatment (B)** | Expanded review using behavioral signals |
+
+ | Metric             | Control | Treatment  |
+| ------------------ | ------- | ---------- |
+| Flag Rate          | ~0%     | 12.6%      |
+| Fraud Recall       | 0%      | 19.5%      |
+| Review Cost ($)    | $0      | $537K      |
+| Loss Prevented ($) | $0      | $24K       |
+| **Net Impact ($)** | $0      | **–$513K** |
+
 Insight
 
 While the expanded strategy improved fraud detection, the additional operational cost far exceeded the incremental fraud losses prevented, resulting in a negative net financial impact.
@@ -117,6 +125,7 @@ Cleaned, enriched, and structured for downstream analysis and BI consumption.
 
 Executive overview of fraud and risk concentration
 
+
 Operational review and customer friction indicators
 
 Finance view of cost vs. loss trade-offs
@@ -134,17 +143,6 @@ Review costs are estimated and scenario-based
 
 No production deployment or feedback loop implemented
 
-8. Why This Project Matters
-
-This project demonstrates how a Data Analyst:
-
-Translates transaction data into business-relevant risk insights
-
-Quantifies operational and financial trade-offs
-
-Uses experimentation to challenge intuition
-
-Recommends when not to act based on data
 
 🏆 Skills Demonstrated
 Hard Skills
