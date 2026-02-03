@@ -127,9 +127,13 @@ Cleaned, enriched, and structured for downstream analysis and BI consumption.
 
 Executive overview of fraud and risk concentration
 <img src="dashboard/Exec.png" width="900">
+
 Operational review and customer friction indicators
+<img src="dashboard/Risk.png" width="900">
 
 Finance view of cost vs. loss trade-offs
+<img src="dashboard/Finance.png" width="900">
+
 
 📘 Analyst Notebook
 End-to-end analysis documenting assumptions, logic, experimentation, and decisions.
