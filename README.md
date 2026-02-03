@@ -1,4 +1,4 @@
-Transaction Anomaly & Risk Detection for CardX Payments
+Transaction Anomaly & Risk Detection for Cardm Payments
 
 Role: Mid–Senior Data Analyst
 Domain: Financial Services • Payments • Risk Analytics
