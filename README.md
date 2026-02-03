@@ -4,6 +4,7 @@ Role: Mid–Senior Data Analyst
 Domain: Financial Services • Payments • Risk Analytics
 Tools: Python (Pandas, NumPy, Matplotlib, Seaborn), Snowflake, Power BI
 
+
 1. Business Context & Objective
 
 The Scenario
@@ -43,7 +44,14 @@ PCA-transformed behavioral features
 
 Fraud label (historical outcome)
 
-Note: Customer identifiers were not provided. Synthetic customer IDs were generated to demonstrate customer-level behavioral context.
+🛠 Data Architecture & Workflow
+I utilized a hybrid environment to ensure scalability and reproducibility:
+
+Snowflake: Hosted the golden analytical datasets; performed initial aggregations.
+
+Python (Pandas/NumPy): Engineered complex behavioral features (e.g., spend-velocity and amount-deviation).
+
+Power BI: Developed a multi-perspective reporting suite for Stakeholders.
 
 Analytical Workflow
 
@@ -56,6 +64,13 @@ Signal Engineering: Create interpretable risk indicators
 Experimentation: Evaluate review strategies via threshold-based A/B testing
 
 Output: Executive-ready dashboards and decision insights
+
+Risk Signal Logic
+
+Rather than "black-box" modeling, I focused on Transparent Signals:
+Amount Deviation: $z = \frac{x - \mu}{\sigma}$ (Transaction amount vs. Customer average).
+Time-of-Day Risk: Highlighting "Dark Hour" (2 AM - 4 AM) anomalies.
+Velocity: Rolling 24-hour transaction counts to detect "burst" fraud.
 
 3. Business Logic & Risk Signal Design
 
@@ -108,13 +123,7 @@ Evaluated expanded controls via an A/B-style threshold tuning experiment.
 | Loss Prevented ($) | $0      | $24K       |
 | **Net Impact ($)** | $0      | **–$513K** |
 
-Insight
-
-While the expanded strategy improved fraud detection, the additional operational cost far exceeded the incremental fraud losses prevented, resulting in a negative net financial impact.
-
-Decision
-
-Do not adopt expanded review logic in its current form. Behavioral signals should be applied more selectively to avoid excessive review overhead.
+Strategic Decision: Rejected the expansion. The analysis proved that catching an additional $24K in fraud isn't worth a $537K operational bill. Instead, I recommend Automated Step-up Authentication (MFA) for medium-risk tiers to reduce manual review costs.
 
 6. Final Deliverables
 
