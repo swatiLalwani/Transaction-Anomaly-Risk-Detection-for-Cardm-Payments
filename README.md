@@ -124,8 +124,7 @@ Cleaned, enriched, and structured for downstream analysis and BI consumption.
 📊 Power BI Dashboards
 
 Executive overview of fraud and risk concentration
-
-
+<img src="Dashboards/Screenshots/exec.png" width="900">
 Operational review and customer friction indicators
 
 Finance view of cost vs. loss trade-offs
