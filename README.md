@@ -93,10 +93,12 @@ Action Taken:
 Evaluated expanded controls via an A/B-style threshold tuning experiment.
 
 5. Threshold Tuning Experiment (A/B)
+
 | Group             | Review Strategy                          |
 | ----------------- | ---------------------------------------- |
 | **Control (A)**   | Review only highest-risk transactions    |
 | **Treatment (B)** | Expanded review using behavioral signals |
+
 
  | Metric             | Control | Treatment  |
 | ------------------ | ------- | ---------- |
@@ -124,7 +126,7 @@ Cleaned, enriched, and structured for downstream analysis and BI consumption.
 📊 Power BI Dashboards
 
 Executive overview of fraud and risk concentration
-<img src="Dashboards/Screenshots/exec.png" width="900">
+<img src="dashboard/Exec.png" width="900">
 Operational review and customer friction indicators
 
 Finance view of cost vs. loss trade-offs
