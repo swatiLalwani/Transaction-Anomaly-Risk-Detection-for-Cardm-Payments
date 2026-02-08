@@ -1,0 +1,257 @@
+# Data Dictionary
+
+## Dataset Overview
+
+**Source:** Kaggle Credit Card Fraud Detection Dataset  
+**Size:** 284,807 transactions  
+**Time Period:** 2 days of transactions (September 2013)  
+**Fraud Rate:** 0.172% (492 fraudulent transactions)
+
+---
+
+## Raw Data Schema
+
+### Transaction Features
+
+| Column Name | Data Type | Description | Range/Values | Null Values |
+|-------------|-----------|-------------|--------------|-------------|
+| **Time** | Integer | Number of seconds elapsed between this transaction and the first transaction in the dataset | 0 - 172,792 | No |
+| **V1** | Float | PCA component 1 (anonymized behavioral feature) | -56.41 to 2.45 | No |
+| **V2** | Float | PCA component 2 (anonymized behavioral feature) | -72.72 to 22.06 | No |
+| **V3** | Float | PCA component 3 (anonymized behavioral feature) | -48.33 to 9.38 | No |
+| **V4** | Float | PCA component 4 (anonymized behavioral feature) | -5.68 to 16.88 | No |
+| **V5** | Float | PCA component 5 (anonymized behavioral feature) | -113.74 to 34.80 | No |
+| **V6** | Float | PCA component 6 (anonymized behavioral feature) | -26.16 to 73.30 | No |
+| **V7** | Float | PCA component 7 (anonymized behavioral feature) | -43.56 to 120.59 | No |
+| **V8** | Float | PCA component 8 (anonymized behavioral feature) | -73.22 to 20.01 | No |
+| **V9** | Float | PCA component 9 (anonymized behavioral feature) | -13.43 to 15.59 | No |
+| **V10** | Float | PCA component 10 (anonymized behavioral feature) | -24.59 to 23.75 | No |
+| **V11** | Float | PCA component 11 (anonymized behavioral feature) | -4.80 to 12.02 | No |
+| **V12** | Float | PCA component 12 (anonymized behavioral feature) | -18.68 to 7.85 | No |
+| **V13** | Float | PCA component 13 (anonymized behavioral feature) | -5.79 to 7.13 | No |
+| **V14** | Float | PCA component 14 (anonymized behavioral feature) | -19.21 to 10.53 | No |
+| **V15** | Float | PCA component 15 (anonymized behavioral feature) | -4.50 to 8.88 | No |
+| **V16** | Float | PCA component 16 (anonymized behavioral feature) | -14.13 to 17.32 | No |
+| **V17** | Float | PCA component 17 (anonymized behavioral feature) | -25.16 to 9.25 | No |
+| **V18** | Float | PCA component 18 (anonymized behavioral feature) | -9.50 to 5.04 | No |
+| **V19** | Float | PCA component 19 (anonymized behavioral feature) | -7.21 to 5.59 | No |
+| **V20** | Float | PCA component 20 (anonymized behavioral feature) | -54.50 to 39.42 | No |
+| **V21** | Float | PCA component 21 (anonymized behavioral feature) | -34.83 to 27.20 | No |
+| **V22** | Float | PCA component 22 (anonymized behavioral feature) | -10.93 to 10.50 | No |
+| **V23** | Float | PCA component 23 (anonymized behavioral feature) | -44.81 to 22.53 | No |
+| **V24** | Float | PCA component 24 (anonymized behavioral feature) | -2.84 to 4.58 | No |
+| **V25** | Float | PCA component 25 (anonymized behavioral feature) | -10.30 to 7.52 | No |
+| **V26** | Float | PCA component 26 (anonymized behavioral feature) | -2.60 to 3.52 | No |
+| **V27** | Float | PCA component 27 (anonymized behavioral feature) | -22.57 to 31.61 | No |
+| **V28** | Float | PCA component 28 (anonymized behavioral feature) | -15.43 to 33.85 | No |
+| **Amount** | Float | Transaction amount in USD | 0 - 25,691.16 | No |
+| **Class** | Binary | Fraud label (0 = legitimate, 1 = fraud) | 0 or 1 | No |
+
+---
+
+## Feature Engineering: Derived Fields
+
+These fields were engineered during the analysis and added to the analytical dataset:
+
+| Field Name | Data Type | Description | Calculation |
+|------------|-----------|-------------|-------------|
+| **customer_id** | String | Simulated customer identifier | Synthetic ID based on transaction patterns |
+| **hour** | Integer | Hour of day (0-23) | `Time / 3600 % 24` |
+| **day** | Integer | Day number (1-2) | `Time / 86400 + 1` |
+| **is_dark_hours** | Boolean | Flag for overnight hours (2 AM - 4 AM) | `hour.between(2, 4)` |
+| **amount_deviation** | Float | Z-score of amount vs customer baseline | `(Amount - customer_avg) / customer_std` |
+| **velocity_24h** | Integer | Transaction count in last 24 hours | Rolling count over 86,400 seconds |
+| **amount_bucket** | String | Transaction amount range | `(0,50]`, `(50,100]`, `(100,500]`, etc. |
+| **risk_tier** | String | Assigned risk level | LOW, MEDIUM, HIGH based on signal thresholds |
+| **risk_score** | Integer | Number of risk signals triggered | 0-3 |
+
+---
+
+## Risk Signal Definitions
+
+### Amount Deviation
+**Purpose:** Identify transactions that are unusual for a specific customer
+
+**Formula:**
+```
+z = (transaction_amount - customer_avg_amount) / customer_std_amount
+```
+
+**Interpretation:**
+- `z > 2`: Transaction is 2+ standard deviations above customer's typical spend
+- `z < -2`: Transaction is 2+ standard deviations below customer's typical spend
+- `|z| < 2`: Transaction is within normal range for this customer
+
+**Threshold for Risk:**
+- `|z| > 2` → Triggers risk signal
+
+---
+
+### Dark Hours Flag
+**Purpose:** Identify transactions during high-fraud time windows
+
+**Logic:**
+```python
+is_dark_hours = (hour >= 2) & (hour < 4)
+```
+
+**Rationale:**
+- Legitimate transaction volume is lowest between 2-4 AM
+- Fraud rate is 3x higher during this window
+- Fraudsters exploit low monitoring during off-hours
+
+---
+
+### Transaction Velocity
+**Purpose:** Detect burst behavior indicative of card testing or account takeover
+
+**Formula:**
+```
+velocity_24h = count(transactions in last 86,400 seconds)
+```
+
+**Interpretation:**
+- Velocity > 5: More than 5 transactions in 24 hours (potentially suspicious)
+- Velocity > 10: Strong signal of automated fraud or card testing
+
+**Threshold for Risk:**
+- `velocity_24h > 5` → Triggers risk signal
+
+---
+
+## Risk Tier Assignment Logic
+
+### Risk Score Calculation
+```python
+risk_score = 0
+
+if abs(amount_deviation) > 2:
+    risk_score += 1
+
+if is_dark_hours == True:
+    risk_score += 1
+
+if velocity_24h > 5:
+    risk_score += 1
+```
+
+### Tier Assignment
+| Risk Score | Risk Tier | Fraud Rate | Volume |
+|------------|-----------|------------|--------|
+| 0 | LOW | 0.17% | 98.97% |
+| 1-2 | MEDIUM | 0.31% | 1.03% |
+| 3+ | HIGH | — | 0% |
+
+**Note:** HIGH tier has 0% volume in current dataset, indicating threshold may be too aggressive.
+
+---
+
+## Analytical Datasets (Output)
+
+### Exec.csv
+**Purpose:** Executive summary metrics
+
+| Column | Description |
+|--------|-------------|
+| total_transactions | Total transaction count |
+| fraud_transactions | Number of fraudulent transactions |
+| fraud_rate | Overall fraud rate (%) |
+| estimated_loss_prevented | Dollar value of fraud caught |
+
+### Risk.csv
+**Purpose:** Risk tier performance breakdown
+
+| Column | Description |
+|--------|-------------|
+| risk_tier | LOW, MEDIUM, HIGH |
+| transaction_count | Number of transactions in tier |
+| fraud_count | Number of fraudulent transactions in tier |
+| fraud_rate | Fraud rate within tier (%) |
+| fraud_coverage_pct | % of total fraud captured by tier |
+
+### Risk_Distribution.csv
+**Purpose:** Transaction volume by amount bucket and risk tier
+
+| Column | Description |
+|--------|-------------|
+| amount_bucket | Transaction amount range |
+| risk_tier | LOW or MEDIUM |
+| transaction_count | Number of transactions |
+
+### Risk_Time.csv
+**Purpose:** Fraud rate trends over time by risk tier
+
+| Column | Description |
+|--------|-------------|
+| day | Day number (1-2) |
+| risk_tier | LOW or MEDIUM |
+| fraud_rate | Fraud rate for that day and tier (%) |
+
+---
+
+## Data Quality & Validation
+
+### Quality Checks Performed
+
+1. **Null Values:** No nulls found in any field
+2. **Duplicate Transactions:** No exact duplicates (Time + Amount + V1-V28)
+3. **Amount Range:** All amounts >= 0 (no negative values)
+4. **Class Distribution:** Verified 492 fraud cases (0.172% rate)
+5. **Time Continuity:** Sequential time values with no gaps
+
+### Known Limitations
+
+1. **PCA Features:** V1-V28 are anonymized via PCA, limiting interpretability
+2. **Customer IDs:** Simulated based on transaction patterns (not original data)
+3. **Two-Day Window:** Dataset covers only 2 days, limiting time-based analysis
+4. **Imbalanced Classes:** Fraud is rare (0.172%), requiring careful threshold tuning
+
+---
+
+## Usage Notes
+
+### Loading Data
+```python
+import pandas as pd
+
+# Load raw data
+df = pd.read_csv('creditcard.csv')
+
+# Load analytical datasets
+exec_metrics = pd.read_csv('dataset/Exec.csv')
+risk_summary = pd.read_csv('dataset/Risk.csv')
+risk_dist = pd.read_csv('dataset/Risk_Distribution.csv')
+risk_time = pd.read_csv('dataset/Risk_Time.csv')
+```
+
+### Filtering Examples
+```python
+# Get all fraudulent transactions
+fraud_txns = df[df['Class'] == 1]
+
+# Get MEDIUM risk tier transactions
+medium_risk = df[df['risk_tier'] == 'MEDIUM']
+
+# Get dark hours transactions
+dark_hours = df[df['is_dark_hours'] == True]
+
+# Get high-value transactions (>$1000)
+high_value = df[df['Amount'] > 1000]
+```
+
+---
+
+## References
+
+**Original Dataset:**  
+Machine Learning Group - ULB (Université Libre de Bruxelles)  
+Andrea Dal Pozzolo, Olivier Caelen, Reid A. Johnson and Gianluca Bontempi  
+Published on Kaggle: https://www.kaggle.com/mlg-ulb/creditcardfraud
+
+**Citation:**
+```
+Dal Pozzolo, Andrea, et al. "Calibrating probability with undersampling for unbalanced classification." 
+2015 IEEE Symposium Series on Computational Intelligence. IEEE, 2015.
+```
+
+---
